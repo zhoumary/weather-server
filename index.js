@@ -107,7 +107,29 @@ app.post('/weather', (req, res) => {
 
 app.put('/weather/:id', (req, res) => {
     let { time, city, temparature } = req.body;
+    let weather_id = req.params.id;
+    if (!time || !city || !weather_id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provider related weather data!"
+        })
+    }
 
+    const UPDATE_WEATHER = `UPDATE weather_list_table SET ? WHERE id= ?`;
+    Connection.query(UPDATE_WEATHER, [{
+        time: time,
+        city: city,
+        temparature: temparature
+    }, weather_id], (error, results, fields) => {
+        if (error) {
+            throw error;
+        }
+        return res.send({
+            error: false,
+            data: results,
+            message: "weather has been updated successfully!"
+        })
+    })
 })
 
 
