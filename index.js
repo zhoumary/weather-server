@@ -133,6 +133,29 @@ app.put('/weather/:id', (req, res) => {
 })
 
 
+app.delete('/weather/:id', (req, res) => {
+    let weather_id = req.params.id;
+    if (!weather_id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provide the weather you want to delete!"
+        })
+    }
+
+    const DELETE_WEATHER = `DELETE FROM weather_list_table WHERE id = ?`;
+    Connection.query(DELETE_WEATHER, [weather_id], (error, results, fields) => {
+        if (error) {
+            throw error;
+        }
+        return res.send({
+            error: false,
+            data: results,
+            message: "Delete the weather successfully!"
+        })
+    })
+})
+
+
 app.listen(4000, () => {
     console.log('Weather Server listening on port 4000');
 });
