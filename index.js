@@ -403,6 +403,145 @@ app.delete('/cityPoint/:id', (req, res) => {
 
 
 
+/*
+    API for Travel Notes CRUD begins
+*/
+
+// get Travel Notes
+app.get('/travelNotes', (req, res) => {
+    const SELECT_ALL_TRAVNOTES = 'SELECT * FROM travel_notes';
+    Connection.query(SELECT_ALL_TRAVNOTES, (err, notes) => {
+        if (err) {
+            return res.send(err);
+        } else {
+            return res.json({
+                data: notes
+            })
+        }
+    });
+});
+
+app.get('/travelNotes/:id', (req, res) => {
+    let travelNotes_id = req.params.id;
+    if (!travelNotes_id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provide valid City Point id!"
+        });
+    }
+
+    Connection.query('SELECT * FROM travel_notes where id=?', travelNotes_id, (err, results, fields) => {
+        if (err) {
+            throw err;
+        }
+        return res.send({
+            error: false,
+            data: results[0],
+            message: 'Has get the specific Travel Note successfully!'
+        });
+    })
+})
+
+// create Travel Notes
+app.post('/travelNote', (req, res) => {
+    let { title, description, destination, image } = req.body;
+    if (!title) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provide Travel Note data!"
+        })
+    }
+    const INSERT_TRAVNOTE = `INSERT INTO travel_notes SET ?`;
+    Connection.query(INSERT_TRAVNOTE, {
+        title: title,
+        description: description,
+        destination: destination,
+        image: image
+    }, (error, results, fields) => {
+        if (error) {
+            throw error;
+        }
+        return res.send({
+            error: false,
+            data: results,
+            message: "New Travel Note has been created!"
+        })
+    })
+});
+
+// update Travel Notes
+app.put('/cityPoint/:id', (req, res) => {
+    let { scenic_spot_code, scenic_spot_name, city_point_category, city_code, city_name } = req.body;
+    let cityPoint_id = req.params.id;
+    if (!scenic_spot_code || !city_code || !cityPoint_id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provider related City Point data!"
+        })
+    }
+
+    const UPDATE_TOURCITY = `UPDATE city_points SET ? WHERE id= ?`;
+    Connection.query(UPDATE_TOURCITY, [{
+        scenic_spot_code: scenic_spot_code,
+        scenic_spot_name: scenic_spot_name,
+        city_point_category: city_point_category,
+        city_code: city_code,
+        city_name: city_name
+    }, cityPoint_id], (error, results, fields) => {
+        if (error) {
+            throw error;
+        }
+        return res.send({
+            error: false,
+            data: results,
+            message: "The City Point has been updated successfully!"
+        })
+    })
+})
+
+// delete Travel Notes
+app.delete('/cityPoint/:id', (req, res) => {
+    let cityPoint_id = req.params.id;
+    if (!cityPoint_id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provide the City Point you want to delete!"
+        })
+    }
+
+    const DELETE_WEATHER = `DELETE FROM city_points WHERE id = ?`;
+    Connection.query(DELETE_WEATHER, [cityPoint_id], (error, results, fields) => {
+        if (error) {
+            throw error;
+        }
+        return res.send({
+            error: false,
+            data: results,
+            message: "Delete the City Point successfully!"
+        })
+    })
+})
+
+
+
+
+/*
+    API for City Points CRUD ends
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 app.listen(4000, () => {
