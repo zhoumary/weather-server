@@ -21,10 +21,14 @@ Connection.connect(err => {
 console.log(Connection);
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb', extended: true }));
 app.use(bodyParser.urlencoded({
+    limit: '50mb',
+    parameterLimit: 100000,
     extended: true
 }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(fileUpload());
 
 
 
@@ -469,34 +473,53 @@ app.post('/travelNote', (req, res) => {
     })
 });
 
+
 // update Travel Notes
-app.put('/cityPoint/:id', (req, res) => {
-    let { scenic_spot_code, scenic_spot_name, city_point_category, city_code, city_name } = req.body;
-    let cityPoint_id = req.params.id;
-    if (!scenic_spot_code || !city_code || !cityPoint_id) {
+app.put('/travelNote/:id', (req, res) => {
+    let { title, description, destination, image } = req.body;
+    let travelNotes_id = req.params.id;
+
+    let file = req.files.uploaded_image;
+    let img_name = file.name;
+
+    if (!title || !travelNotes_id) {
         return res.status(400).send({
             error: true,
-            message: "Please provider related City Point data!"
+            message: "Please provider related Travel Note data!"
         })
     }
 
-    const UPDATE_TOURCITY = `UPDATE city_points SET ? WHERE id= ?`;
-    Connection.query(UPDATE_TOURCITY, [{
-        scenic_spot_code: scenic_spot_code,
-        scenic_spot_name: scenic_spot_name,
-        city_point_category: city_point_category,
-        city_code: city_code,
-        city_name: city_name
-    }, cityPoint_id], (error, results, fields) => {
-        if (error) {
-            throw error;
-        }
-        return res.send({
-            error: false,
-            data: results,
-            message: "The City Point has been updated successfully!"
+
+    file.mv('/' + file.name, function (err) {
+
+        if (err)
+            return res.status(500).send(err);
+
+        // let sql = "INSERT INTO `users_image`(`first_name`,`last_name`,`mob_no`,`user_name`, `password` ,`image`) VALUES ('" + fname + "','" + lname + "','" + mob + "','" + name + "','" + pass + "','" + img_name + "')";
+
+        // let query = db.query(sql, function (err, result) {
+        //     res.redirect('profile/' + result.insertId);
+        // });
+
+        const UPDATE_TRAVNOTE = `UPDATE travel_notes SET ? WHERE id= ?`;
+        Connection.query(UPDATE_TRAVNOTE, [{
+            title: title,
+            description: description,
+            destination: destination,
+            image: img_name
+        }, travelNotes_id], (error, results, fields) => {
+            if (error) {
+                throw error;
+            }
+            return res.send({
+                error: false,
+                data: results,
+                message: "The Travel Note has been updated successfully!"
+            })
         })
-    })
+    });
+
+
 })
 
 // delete Travel Notes
