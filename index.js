@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require('express'), path = require('path'), fileUpload = require('express-fileupload'), busboy = require('connect-busboy');
 const cors = require('cors');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
@@ -29,6 +29,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload());
+app.use(busboy());
 
 
 
@@ -479,18 +480,27 @@ app.put('/travelNote/:id', (req, res) => {
     let { title, description, destination, image } = req.body;
     let travelNotes_id = req.params.id;
 
-    let file = req.files.uploaded_image;
-    let img_name = file.name;
-
-    if (!title || !travelNotes_id) {
-        return res.status(400).send({
-            error: true,
-            message: "Please provider related Travel Note data!"
+    let files = req.files;
+    // let file = files.fileUpload;
+    // return res.send(files.name);
+    if (!files) {
+        return res.send({
+            fileUpload: files,
+            name: files.uploadfile.name,
+            reqBody: req.body,
+            message: "ensure the upload file"
         })
     }
 
+    // if (!title) {
+    //     return res.status(400).send({
+    //         error: true,
+    //         message: "Please provider related Travel Note data!"
+    //     })
+    // }
 
-    file.mv('/' + file.name, function (err) {
+
+    files.uploadfile.mv('C:\Users\I323799\weather-server' + files.uploadfile.name, function (err) {
 
         if (err)
             return res.status(500).send(err);
@@ -503,10 +513,10 @@ app.put('/travelNote/:id', (req, res) => {
 
         const UPDATE_TRAVNOTE = `UPDATE travel_notes SET ? WHERE id= ?`;
         Connection.query(UPDATE_TRAVNOTE, [{
-            title: title,
-            description: description,
-            destination: destination,
-            image: img_name
+            // title: title,
+            // description: description,
+            // destination: destination,
+            image: files.uploadfile.name
         }, travelNotes_id], (error, results, fields) => {
             if (error) {
                 throw error;
