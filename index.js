@@ -419,6 +419,8 @@ app.get('/travelNotes', (req, res) => {
         if (err) {
             return res.send(err);
         } else {
+
+            // res.json will response json format data, and can not process binary
             return res.json({
                 data: notes
             })
@@ -426,12 +428,40 @@ app.get('/travelNotes', (req, res) => {
     });
 });
 
+app.get("/travalNodesImg/:id", (req, res) => {
+    let travelNotes_id = req.params.id;
+    if (!travelNotes_id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provide valid Travel Note id!"
+        });
+    }
+
+    Connection.query('SELECT * FROM travel_notes where id=?', travelNotes_id, (err, results, fields) => {
+        if (err) {
+            throw err;
+        }
+        return res.end(results[0].image, "binary");
+    })
+})
+
+app.get("/imgtest", (req, res) => {
+    const SELECT_ALL_TRAVNOTES = 'SELECT * FROM travel_notes';
+    Connection.query(SELECT_ALL_TRAVNOTES, (err, notes) => {
+        if (err) {
+            return res.send(err);
+        } else {
+            return res.end(notes[1].image, "binary")
+        }
+    });
+})
+
 app.get('/travelNotes/:id', (req, res) => {
     let travelNotes_id = req.params.id;
     if (!travelNotes_id) {
         return res.status(400).send({
             error: true,
-            message: "Please provide valid City Point id!"
+            message: "Please provide valid Travel Note id!"
         });
     }
 
