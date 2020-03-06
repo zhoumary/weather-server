@@ -596,67 +596,42 @@ app.delete('/cityPoint/:id', (req, res) => {
 /*
     API for Travel Note Content CRUD begins
 */
-app.get('/travelNoteContent', (req, res) => {
-    const SELECT_ALL_CONTENT = 'SELECT * FROM travel_notes_content';
-    Connection.query(SELECT_ALL_CONTENT, (err, content) => {
+// get cotents according to the current travel note
+app.get('/travelNote', (req, res) => {
+    const noteID = req.query.noteID;
+
+    const SELECT_ALL_NOTECONTENT = 'SELECT * FROM travel_note where noteID=?';
+    Connection.query(SELECT_ALL_NOTECONTENT, noteID, (err, contents) => {
         if (err) {
             return res.send(err);
         } else {
 
             // res.json will response json format data, and can not process binary
             return res.json({
-                data: content
+                data: contents
             })
         }
     });
 });
 
-app.get("/travelNoteContentOne", (req, res) => {
-    let noteContent_id = req.query.noteID;
-
-    console.log(noteContent_id);
-
-    if (!noteContent_id) {
-        return res.status(400).send({
-            error: true,
-            message: "Please provide valid Travel Note Content id!"
-        });
-    }
-
-    Connection.query('SELECT * FROM travel_notes_content where noteID=?', noteContent_id, (err, results, fields) => {
-        console.log(results[0].content)
 
 
-        let contentText = Buffer.from(results[0].content).toString('utf8');
-
-        if (err) {
-            throw err;
-        }
-        return res.send({
-            error: false,
-            data: contentText,
-            message: 'Has get the specific Travel Note successfully!'
-        });
-
-
-    })
-})
-
-app.get("/travelNoteContents", (req, res) => {
+// get the specific resources from above api
+app.get("/travelNoteContents/:contentID", (req, res) => {
     // let parsedUrl = url.parse(rawUrl);
     // let parsedQs = querystring.parse(parsedUrl.query);
-    let noteContent_id = req.query.noteID;
+    let content_id = req.params.contentID;
 
-    console.log(noteContent_id);
+    console.log(content_id);
 
-    if (!noteContent_id) {
+    if (!content_id) {
         return res.status(400).send({
             error: true,
             message: "Please provide valid Travel Note Content id!"
         });
     }
 
-    Connection.query('SELECT * FROM travel_notes_content where noteID=?', noteContent_id, (err, results, fields) => {
+    Connection.query('SELECT * FROM travel_notes_content where contentID=?', content_id, (err, results, fields) => {
         if (err) {
             throw err;
         }
@@ -664,13 +639,36 @@ app.get("/travelNoteContents", (req, res) => {
         if (results) {
             // console.log(res.write(results[0].content));
             return res.end(results[0].content, "binary");
-        } else {
-            return []
         }
-
-
     })
 })
+
+
+
+app.post("/resource", (req, res) => {
+    // get content type & blob from request header
+    // store them to resource table
+    // return the new created resource id
+    // then, frontend use the resource id to reference the resource
+})
+
+
+app.post("/traval_notes", (req, res) => {
+    // get full html from frontend
+    // store it to database
+})
+
+
+
+// implementation by CKEditor5
+// app.get("/traval_notes/:id", (req, res) => {
+//     // get html from databse
+//     // return it to frontend
+// })
+
+
+
+
 
 
 
