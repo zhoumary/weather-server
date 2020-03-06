@@ -1,8 +1,13 @@
 const express = require('express'), path = require('path'), fileUpload = require('express-fileupload'), busboy = require('connect-busboy');
+const url = require('url');
+const querystring = require('querystring');
 const cors = require('cors');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
-
+const blobUtil = require('blob-util');
+const Blob = require("cross-blob");
+const FileReader = require('filereader')
+const fs = require('fs');
 const app = express();
 
 
@@ -589,13 +594,89 @@ app.delete('/cityPoint/:id', (req, res) => {
 
 
 /*
-    API for City Points CRUD ends
+    API for Travel Note Content CRUD begins
 */
+app.get('/travelNoteContent', (req, res) => {
+    const SELECT_ALL_CONTENT = 'SELECT * FROM travel_notes_content';
+    Connection.query(SELECT_ALL_CONTENT, (err, content) => {
+        if (err) {
+            return res.send(err);
+        } else {
+
+            // res.json will response json format data, and can not process binary
+            return res.json({
+                data: content
+            })
+        }
+    });
+});
+
+app.get("/travelNoteContentOne", (req, res) => {
+    let noteContent_id = req.query.noteID;
+
+    console.log(noteContent_id);
+
+    if (!noteContent_id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provide valid Travel Note Content id!"
+        });
+    }
+
+    Connection.query('SELECT * FROM travel_notes_content where noteID=?', noteContent_id, (err, results, fields) => {
+        console.log(results[0].content)
+
+
+        let contentText = Buffer.from(results[0].content).toString('utf8');
+
+        if (err) {
+            throw err;
+        }
+        return res.send({
+            error: false,
+            data: contentText,
+            message: 'Has get the specific Travel Note successfully!'
+        });
+
+
+    })
+})
+
+app.get("/travelNoteContents", (req, res) => {
+    // let parsedUrl = url.parse(rawUrl);
+    // let parsedQs = querystring.parse(parsedUrl.query);
+    let noteContent_id = req.query.noteID;
+
+    console.log(noteContent_id);
+
+    if (!noteContent_id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provide valid Travel Note Content id!"
+        });
+    }
+
+    Connection.query('SELECT * FROM travel_notes_content where noteID=?', noteContent_id, (err, results, fields) => {
+        if (err) {
+            throw err;
+        }
+
+        if (results) {
+            // console.log(res.write(results[0].content));
+            return res.end(results[0].content, "binary");
+        } else {
+            return []
+        }
+
+
+    })
+})
 
 
 
-
-
+/*
+    API for Travel Note Content CRUD ends
+*/
 
 
 
