@@ -598,10 +598,10 @@ app.delete('/cityPoint/:id', (req, res) => {
 */
 // get cotents according to the current travel note
 app.get('/travelNote', (req, res) => {
-    const noteID = req.query.noteID;
+    // const noteID = req.query.noteID;
 
-    const SELECT_ALL_NOTECONTENT = 'SELECT * FROM travel_note where noteID=?';
-    Connection.query(SELECT_ALL_NOTECONTENT, noteID, (err, contents) => {
+    const SELECT_ALL_NOTECONTENT = 'SELECT * FROM travel_note';
+    Connection.query(SELECT_ALL_NOTECONTENT, (err, contents) => {
         if (err) {
             return res.send(err);
         } else {
@@ -617,21 +617,20 @@ app.get('/travelNote', (req, res) => {
 
 
 // get the specific resources from above api
-app.get("/travelNoteContents/:contentID", (req, res) => {
+// implementation by CKEditor5
+app.get("/travelNote/:id", (req, res) => {
     // let parsedUrl = url.parse(rawUrl);
     // let parsedQs = querystring.parse(parsedUrl.query);
-    let content_id = req.params.contentID;
+    let id = req.params.id;
 
-    console.log(content_id);
-
-    if (!content_id) {
+    if (!id) {
         return res.status(400).send({
             error: true,
             message: "Please provide valid Travel Note Content id!"
         });
     }
 
-    Connection.query('SELECT * FROM travel_notes_content where contentID=?', content_id, (err, results, fields) => {
+    Connection.query('SELECT * FROM travel_note where id=?', id, (err, results, fields) => {
         if (err) {
             throw err;
         }
@@ -644,6 +643,17 @@ app.get("/travelNoteContents/:contentID", (req, res) => {
 })
 
 
+app.post("/traval_notes", (req, res) => {
+    // get full html from frontend
+    // store it to database
+})
+
+
+app.get("/resource/:id", (req, res) => {
+    // get html from databse
+    // return it to frontend
+})
+
 
 app.post("/resource", (req, res) => {
     // get content type & blob from request header
@@ -653,34 +663,9 @@ app.post("/resource", (req, res) => {
 })
 
 
-app.post("/traval_notes", (req, res) => {
-    // get full html from frontend
-    // store it to database
-})
-
-
-
-// implementation by CKEditor5
-// app.get("/traval_notes/:id", (req, res) => {
-//     // get html from databse
-//     // return it to frontend
-// })
-
-
-
-
-
-
-
 /*
     API for Travel Note Content CRUD ends
 */
-
-
-
-
-
-
 
 
 
