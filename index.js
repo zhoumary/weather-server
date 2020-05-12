@@ -649,14 +649,56 @@ app.post("/traval_notes", (req, res) => {
 })
 
 
-app.get("/resource/:id", (req, res) => {
+app.get("/resources/:id", (req, res) => {
     // get html from databse
     // return it to frontend
+
+    let id = req.params.id;
+
+    if (!id) {
+        return res.status(400).send({
+            error: true,
+            message: "Please provide valid Resources id!"
+        });
+    }
+
+    Connection.query('SELECT * FROM resources where id=?', id, (err, results, fields) => {
+        if (err) {
+            throw err;
+        }
+
+        if (results) {
+            // console.log(res.write(results[0].content));
+            return res.end(results[0].content, "binary");
+        }
+    })
 })
 
 
 app.post("/resource", (req, res) => {
     // get content type & blob from request header
+
+
+    let { content, type } = req.body;
+    const INSERT_RESOURCES = `INSERT INTO resources SET ?`;
+    Connection.query(INSERT_RESOURCES, {
+        content: content,
+        type: type
+    }, (error, results, fields) => {
+        if (error) {
+            throw error;
+        }
+        return res.send({
+            error: false,
+            data: results,
+            message: "New Resource has been created!"
+        })
+    })
+
+
+
+
+
     // store them to resource table
     // return the new created resource id
     // then, frontend use the resource id to reference the resource
