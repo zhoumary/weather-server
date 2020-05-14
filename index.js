@@ -643,9 +643,24 @@ app.get("/travelNote/:id", (req, res) => {
 })
 
 
-app.post("/traval_notes", (req, res) => {
+app.post("/noteContent", (req, res) => {
     // get full html from frontend
     // store it to database
+
+    let {content} = req.body;
+    const INSERT_TRAVELNOTE = `INSERT INTO travel_note SET ?`;
+    Connection.query(INSERT_TRAVELNOTE, {
+        content: content
+    }, (error, results, fields) => {
+        if (error) {
+            throw error;
+        }
+        return res.send({
+            error: false,
+            data: results,
+            message: "New Travel Note has been created!"
+        })
+    })
 })
 
 
@@ -669,7 +684,10 @@ app.get("/resources/:id", (req, res) => {
 
         if (results) {
             // console.log(res.write(results[0].content));
-            return res.end(results[0].content, "binary");
+            return res.end(
+                Buffer.from(results[0].content.toString("UTF-8"),"base64")
+            );
+            // return res.end(results[0].content, "binary");
         }
     })
 })
